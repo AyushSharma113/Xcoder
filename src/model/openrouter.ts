@@ -17,6 +17,10 @@ import type {
 
 let cachedClient: OpenAI | null = null;
 
+export function resetOpenRouterClient(): void {
+  cachedClient = null;
+}
+
 function getClient(): OpenAI {
   if (cachedClient) return cachedClient;
   const cfg = getConfig().openrouter;

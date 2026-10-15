@@ -1,7 +1,7 @@
 import { getConfig, type Provider } from "../config.js";
 import { XcoderModelError, type ErrorCategory } from "./errors.js";
-import { geminiAdapter } from "./gemini.js";
-import { openrouterAdapter } from "./openrouter.js";
+import { geminiAdapter, resetGeminiClient } from "./gemini.js";
+import { openrouterAdapter, resetOpenRouterClient } from "./openrouter.js";
 import type {
   Message,
   ModelAdapter,
@@ -9,6 +9,11 @@ import type {
   SendMessageOptions,
   StreamChunk,
 } from "./types.js";
+
+export function resetClients(): void {
+  resetGeminiClient();
+  resetOpenRouterClient();
+}
 
 const adapterRegistry: Record<Provider, () => ModelAdapter> = {
   gemini: () => geminiAdapter,
@@ -29,7 +34,7 @@ export function getAdapter(provider?: Provider): ModelAdapter {
   return factory();
 }
 
-function normalizeError(error: unknown, provider: string): XcoderModelError {
+export function normalizeError(error: unknown, provider: string): XcoderModelError {
   if (error instanceof XcoderModelError) {
     return error;
   }
@@ -78,12 +83,21 @@ function normalizeError(error: unknown, provider: string): XcoderModelError {
     category = "CONTEXT_LENGTH";
     isRetryable = false;
   } else if (
+    status === 400 ||
+    lowerMsg.includes("invalid request") ||
+    lowerMsg.includes("invalid_request") ||
+    lowerMsg.includes("bad request")
+  ) {
+    category = "INVALID_REQUEST";
+    isRetryable = false;
+  } else if (
     lowerMsg.includes("timeout") ||
     lowerMsg.includes("econnrefused") ||
     lowerMsg.includes("network") ||
     lowerMsg.includes("fetch failed") ||
     lowerMsg.includes("enotfound") ||
-    lowerMsg.includes("connection aborted")
+    lowerMsg.includes("connection aborted") ||
+    lowerMsg.includes("aborted")
   ) {
     category = "NETWORK";
     isRetryable = true;

@@ -13,6 +13,10 @@ import type {
 
 let cachedAi: GoogleGenAI | null = null;
 
+export function resetGeminiClient(): void {
+  cachedAi = null;
+}
+
 function getAi(): GoogleGenAI {
   if (cachedAi) return cachedAi;
   const cfg = getConfig().gemini;
