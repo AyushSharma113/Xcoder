@@ -3,6 +3,7 @@ import { stdin, stdout } from "node:process";
 import { sendMessage } from "./model/client.js";
 import { getConfig } from "./config.js";
 import { XcoderModelError } from "./model/errors.js";
+import { Message } from "./model/types.js";
 
 async function main(): Promise<void> {
   const terminal = createInterface({
@@ -16,6 +17,10 @@ async function main(): Promise<void> {
     terminal.close();
     process.exit(0);
   });
+  
+
+  const history: Message[] = [];
+  
   
   try {
     console.log("\n╭──────────────────────────────╮");
@@ -37,16 +42,32 @@ async function main(): Promise<void> {
         break;
       }
 
-      try {
-        const response = await sendMessage([
-          {
-            role: "user",
-            content: userInput,
-          },
-        ]);
 
+
+      const userMessage: Message = {
+        role: "user",
+        content: userInput
+      }
+
+      history.push(userMessage);
+      
+
+      try {
+        const response = await sendMessage(history)
+
+
+        const assistantMessage: Message = {
+          role: "assistant",
+          content: response.content
+        }
+        
+        
+        
         console.log(`\nXcoder: ${response.content}\n`);
       } catch (error: unknown) {
+
+        history.pop();
+        
         if (error instanceof XcoderModelError) {
           console.error(
             `\nModel error [${error.category}]: ${error.message}\n`
@@ -61,10 +82,6 @@ async function main(): Promise<void> {
   }
 }
 
-// process.on("SIGINT", () => {
-//   console.log("\nGoodbye!");
-//   process.exit(0);
-// });
 
 void main().catch(() => {
   console.error("Xcoder failed to start.");
