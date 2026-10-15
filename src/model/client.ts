@@ -124,7 +124,8 @@ export async function* streamMessage(
   provider?: Provider
 ): AsyncIterable<StreamChunk> {
   const adapter = getAdapter(provider);
-
+  
+  // if the adapter doesnot support streaming 
   if (!adapter.streamMessage) {
     // Fallback: wait for full message and yield a single chunk
     const response = await sendMessage(messages, options, provider);
