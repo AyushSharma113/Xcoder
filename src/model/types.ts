@@ -92,3 +92,6 @@ export interface ModelAdapter {
     options?: SendMessageOptions
   ): AsyncIterable<StreamChunk>;
 }
+
+
+
