@@ -39,7 +39,7 @@ describe("Conversation history management", () => {
 
     const finalHistory = await runCliSession({
       terminal: mockTerminal,
-      sendMessageFn: mockSendMessage,
+      runAgentTurnFn: mockSendMessage,
     });
 
     assert.equal(finalHistory.length, 4);
@@ -70,7 +70,7 @@ describe("Conversation history management", () => {
 
     await runCliSession({
       terminal: mockTerminal,
-      sendMessageFn: mockSendMessage,
+      runAgentTurnFn: mockSendMessage,
     });
 
     assert.equal(turnSnapshots.length, 3);
@@ -120,7 +120,7 @@ describe("Conversation history management", () => {
 
     const finalHistory = await runCliSession({
       terminal: mockTerminal,
-      sendMessageFn: mockSendMessage,
+      runAgentTurnFn: mockSendMessage,
     });
 
     // The failed Turn 2 user message must NOT be in final history
@@ -165,7 +165,7 @@ describe("Conversation history management", () => {
 
     const finalHistory = await runCliSession({
       terminal: mockTerminal,
-      sendMessageFn: mockSendMessage,
+      runAgentTurnFn: mockSendMessage,
     });
 
     // Call 1: [Turn 1] -> succeeded

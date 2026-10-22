@@ -1,9 +1,10 @@
 import { createInterface, type Interface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { sendMessage } from "./model/client.js";
+import { runAgentTurn } from "./agent.js";
 import { getConfig } from "./config.js";
 import { sanitizeMessage, XcoderModelError } from "./model/errors.js";
-import { Message } from "./model/types.js";
+import type { Message, ModelResponse } from "./model/types.js";
+
 
 export interface CliSessionOptions {
   terminal?: Interface | {
@@ -11,7 +12,10 @@ export interface CliSessionOptions {
     close: () => void;
     on?: (event: string, listener: (...args: unknown[]) => void) => unknown;
   };
-  sendMessageFn?: typeof sendMessage;
+  runAgentTurnFn?: (
+    history: Message[],
+    options?: { signal?: AbortSignal },
+  ) => Promise<ModelResponse>;
   initialHistory?: Message[];
   signal?: AbortSignal;
   provider?: string;
@@ -26,8 +30,10 @@ export async function runCliSession(options: CliSessionOptions = {}): Promise<Me
       prompt: "You: ",
     });
 
-  const sendMessageFn = options.sendMessageFn ?? sendMessage;
-  const history: Message[] = options.initialHistory ? [...options.initialHistory] : [];
+  const runAgentTurnFn = options.runAgentTurnFn ?? runAgentTurn;
+  const history: Message[] = options.initialHistory
+    ? [...options.initialHistory]
+    : [];
   const abortController = new AbortController();
 
   const onSigint = () => {
@@ -98,7 +104,7 @@ export async function runCliSession(options: CliSessionOptions = {}): Promise<Me
       history.push(userMessage);
 
       try {
-        const response = await sendMessageFn(history, {
+        const response = await runAgentTurnFn(history, {
           signal: abortController.signal,
         });
 
