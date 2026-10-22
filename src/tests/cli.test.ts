@@ -32,7 +32,7 @@ describe("CLI interaction and lifecycle", () => {
 
     const history = await runCliSession({
       terminal: mockTerminal,
-      sendMessageFn: mockSendMessage,
+      runAgentTurnFn: mockSendMessage,
     });
 
     assert.equal(history.length, 0);
@@ -51,7 +51,7 @@ describe("CLI interaction and lifecycle", () => {
 
     const history = await runCliSession({
       terminal: mockTerminal,
-      sendMessageFn: async () => ({ content: "", finishReason: "stop" }),
+      runAgentTurnFn: async () => ({ content: "", finishReason: "stop" }),
     });
 
     assert.equal(history.length, 0);
@@ -75,7 +75,7 @@ describe("CLI interaction and lifecycle", () => {
 
     const history = await runCliSession({
       terminal: mockTerminal,
-      sendMessageFn: mockSendMessage,
+      runAgentTurnFn: mockSendMessage,
     });
 
     // Only 1 model call occurred
@@ -136,7 +136,7 @@ describe("CLI interaction and lifecycle", () => {
 
     const history = await runCliSession({
       terminal: mockTerminal,
-      sendMessageFn: mockSendMessage,
+      runAgentTurnFn: mockSendMessage,
     });
 
     assert.equal(history.length, 2);
